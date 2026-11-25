@@ -1,0 +1,70 @@
+/* Template fixo TripOne — medidas em px na largura 1390 (a exportação multiplica a resolução). */
+.tpl {
+  --azul: #1b3461;
+  --laranja: #e8883c;
+  --bege: #f4e8d3;
+  --icone: #e1e6dc;
+  width: 1390px;
+  background: #fff;
+  color: var(--azul);
+  font-family: 'Montserrat', system-ui, sans-serif;
+  padding: 36px 40px 48px;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+.tpl * { box-sizing: border-box; }
+.tpl-topo { display: flex; justify-content: space-between; align-items: flex-start; }
+.tpl-marca img { height: 82px; display: block; }
+.tpl-slogan { margin-top: 10px; font-size: 14px; font-weight: 700; letter-spacing: 2.6px; }
+.tpl-titulo { text-align: right; }
+.tpl-titulo h1 { margin: 0; font-size: 55px; font-weight: 800; letter-spacing: 1px; line-height: 1.1; }
+.tpl-linha { position: relative; height: 14px; margin: 6px 0 4px auto; width: 325px; }
+.tpl-linha::before { content: ''; position: absolute; left: 0; right: 0; top: 6px; height: 3px; background: var(--laranja); border-radius: 2px; }
+.tpl-linha::after { content: ''; position: absolute; left: 50%; top: 0; width: 13px; height: 13px; margin-left: -6px; background: var(--laranja); transform: rotate(45deg); box-shadow: 0 0 0 5px #fff; }
+.tpl-num { font-size: 16px; letter-spacing: 1.4px; font-weight: 500; }
+.tpl-num b { font-weight: 800; }
+
+.tpl-caixa { margin: 14px 0 0 auto; width: 934px; border: 2px solid var(--azul); border-radius: 12px; display: flex; padding: 12px 20px; }
+.tpl-caixa > div { flex: 1; display: flex; align-items: center; gap: 14px; padding: 0 12px; border-left: 1.5px solid #dde1e7; }
+.tpl-caixa > div:first-child { border-left: 0; padding-left: 0; flex: 1.3; }
+.tpl-ico { flex: none; width: 42px; height: 42px; border-radius: 8px; background: var(--icone); display: grid; place-items: center; }
+.tpl-rot { font-size: 15px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; }
+.tpl-val { font-size: 20px; font-weight: 800; line-height: 1.45; text-transform: uppercase; letter-spacing: .3px; }
+
+.tpl-tab { width: 100%; border-collapse: collapse; margin-top: 22px; table-layout: fixed; }
+.tpl-tab th { font-size: 15px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; text-align: center; padding: 14px 6px; border-bottom: 2px solid var(--azul); line-height: 1.6; vertical-align: middle; }
+.tpl-tab th.esq { text-align: left; }
+.tpl-tab th.bege { background: var(--bege); }
+.tpl-tab td { border-bottom: 1.5px solid #e3e3e3; padding: 30px 6px; vertical-align: middle; text-align: center; }
+.tpl-tab td.bege { background: var(--bege); }
+.tpl-tab td.hotel { text-align: left; vertical-align: top; padding: 30px 12px 22px 14px; }
+.tpl-tab th:first-child { padding-left: 14px; }
+.tpl-est { font-size: 19px; letter-spacing: 2px; line-height: 1; margin-bottom: 12px; }
+.tpl-nome { font-size: 22px; font-weight: 800; line-height: 1.52; word-break: break-word; }
+.tpl-g { display: flex; align-items: center; gap: 6px; font-size: 15px; margin: 4px 0 4px; }
+.tpl-gb { width: 19px; height: 19px; border-radius: 50%; background: #4a86e8; color: #fff; font-weight: 800; font-size: 12px; display: grid; place-items: center; }
+.tpl-g b { font-weight: 800; }
+.tpl-gs { color: var(--laranja); letter-spacing: 1px; font-size: 14px; }
+.tpl-gc { color: #4a5670; }
+.tpl-end { font-size: 15px; font-weight: 500; line-height: 1.5; word-break: break-word; }
+.tpl-traco { color: #9aa3b2; font-size: 18px; }
+.tpl-cat { text-align: left !important; }
+.tpl-cat b { display: block; font-size: 21px; font-weight: 800; margin-bottom: 8px; }
+.tpl-cat ul { margin: 0; padding: 0; list-style: none; }
+.tpl-cat li { font-size: 17px; font-weight: 500; line-height: 1.55; padding-left: 16px; position: relative; }
+.tpl-cat li::before { content: '•'; position: absolute; left: 0; font-size: 14px; }
+.tpl-circ { width: 57px; height: 57px; border-radius: 50%; background: var(--icone); display: grid; place-items: center; margin: 0 auto 12px; }
+.tpl-lbl { font-size: 15px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.tpl-lbl.n { text-transform: none; letter-spacing: .6px; }
+.tpl-dia, .tpl-tot { font-size: 22px; font-weight: 800; line-height: 1.5; }
+.tpl-obs { text-align: left !important; font-size: 15px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; }
+
+.tpl-rod { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-top: 26px; }
+.tpl-pill { display: inline-flex; align-items: center; gap: 10px; background: var(--azul); color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 2px; padding: 9px 28px 9px 16px; border-radius: 6px 22px 22px 6px; text-transform: uppercase; }
+.tpl-rod ul { list-style: none; padding: 0; margin: 16px 0 0; }
+.tpl-rod li { display: flex; gap: 12px; font-size: 15px; color: #3c4a64; line-height: 1.5; margin-bottom: 8px; font-weight: 500; }
+.tpl-bul { flex: none; width: 14px; height: 14px; border-radius: 50%; margin-top: 4px; }
+.tpl-bul.az { background: var(--azul); position: relative; }
+.tpl-bul.az::after { content: ''; position: absolute; left: 4px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.tpl-bul.la { background: var(--laranja); }
+.tpl-vazio { padding: 60px 0; text-align: center; color: #9aa3b2; font-size: 17px; border-bottom: 1.5px solid #e3e3e3; }
