@@ -20,7 +20,9 @@ Leva uns 20 minutos, uma única vez. No fim você terá uma URL e um token para 
 
 ## 3. Publicar o servidor TripOne (Cloudflare Workers, plano gratuito)
 
-Precisa de Node.js instalado. No terminal:
+**Opção A, pelo painel da Cloudflare (sem terminal):** crie o Worker, cole o conteúdo de [`worker/worker.js`](../worker/worker.js) no editor, clique em Deploy e cadastre os secrets `GOOGLE_MAPS_API_KEY`, `ANTHROPIC_API_KEY` e `APP_TOKEN` em Settings › Variables and Secrets.
+
+**Opção B, pelo terminal** (precisa de Node.js):
 
 ```bash
 cd worker
