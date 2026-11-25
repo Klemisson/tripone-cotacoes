@@ -3,10 +3,25 @@ import { Download, Upload, RotateCcw } from 'lucide-react';
 import { configPadrao, exportarBackup, importarBackup, salvarConfig, useDB } from '../lib/store';
 import { Campo, LinhasInput } from '../components/Campos';
 import logoPadrao from '../assets/logo-tripone.png';
+import { buscarHoteis } from '../lib/integracoes';
 
 export default function Configuracoes() {
   const { config, cotacoes } = useDB();
   const [msg, setMsg] = useState<string | null>(null);
+  const [testando, setTestando] = useState(false);
+  const [teste, setTeste] = useState<{ ok: boolean; txt: string } | null>(null);
+  const testar = async () => {
+    setTeste(null);
+    setTestando(true);
+    try {
+      const r = await buscarHoteis('Copacabana Palace Rio de Janeiro');
+      setTeste({ ok: true, txt: r.length ? `Conectado. Google respondeu: ${r[0].nome} (${r[0].notaGoogle ?? '—'} ★).` : 'Conectado, mas o Google não retornou resultados.' });
+    } catch (e) {
+      setTeste({ ok: false, txt: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setTestando(false);
+    }
+  };
   const maiorNumero = cotacoes.reduce((m, c) => Math.max(m, c.numero), 0);
 
   const trocarLogo = (f: File) => {
@@ -76,16 +91,29 @@ export default function Configuracoes() {
               <Campo rotulo="Chave da API Anthropic (fica salva só neste navegador)">
                 <input className="inp" type="password" placeholder="sk-ant-..." value={config.anthropicApiKey} onChange={(e) => salvarConfig({ anthropicApiKey: e.target.value })} />
               </Campo>
-              <Campo rotulo="OU endpoint próprio (recomendado em produção: a chave fica no servidor)">
-                <input className="inp" placeholder="https://.../extrair-cotacao" value={config.iaProxyUrl} onChange={(e) => salvarConfig({ iaProxyUrl: e.target.value })} />
-              </Campo>
+              <div style={{ fontSize: 11.5, color: '#6b7488' }}>Com o servidor TripOne configurado abaixo, a IA passa por ele e esta chave não é usada.</div>
             </div>
           </section>
 
           <section className="card">
-            <h3>Integrações de hotéis <span className="selo">AGUARDANDO APROVAÇÃO</span></h3>
-            <div className="integ"><b>Hoje (gratuito):</b> os botões “Conferir no Google Maps” e “Ver distância” abrem o Maps com a busca pronta; você confere e digita nota, avaliações e km.</div>
-            <div className="integ"><b>Proposta:</b> busca automática de endereço, nota Google, nº de avaliações e distância via Google Places + Routes. O custo é zero dentro da cota mensal gratuita. Os detalhes foram enviados para aprovação.</div>
+            <h3>Integrações · Google Places + Routes {config.apiUrl.trim() ? <span className="selo ok">ATIVA</span> : <span className="selo">NÃO CONFIGURADA</span>}</h3>
+            <div className="pilha">
+              <div className="integ">
+                Busca endereço, <b>nota Google</b> e <b>nº de avaliações</b> do hotel e calcula a <b>distância por estrada</b> a partir do endereço de referência.
+                Custo: grátis até 1.000 buscas de hotel e 10.000 distâncias por mês (Google); acima disso, US$ 35 por 1.000 buscas e US$ 5 por 1.000 distâncias.
+                As chaves ficam no servidor TripOne (pasta <code>worker/</code> do repositório, guia em <code>docs/instalacao-integracoes.md</code>).
+              </div>
+              <Campo rotulo="URL do servidor TripOne">
+                <input className="inp" placeholder="https://tripone-cotacoes-api.SEU-USUARIO.workers.dev" value={config.apiUrl} onChange={(e) => salvarConfig({ apiUrl: e.target.value })} />
+              </Campo>
+              <Campo rotulo="Token de acesso (o mesmo APP_TOKEN do servidor)">
+                <input className="inp" type="password" value={config.apiToken} onChange={(e) => salvarConfig({ apiToken: e.target.value })} />
+              </Campo>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button className="btn peq" disabled={!config.apiUrl.trim() || testando} onClick={testar}>{testando ? 'Testando…' : 'Testar conexão'}</button>
+                {teste && <span style={{ fontSize: 11.5, color: teste.ok ? '#23713a' : '#a82a2a' }}>{teste.txt}</span>}
+              </div>
+            </div>
           </section>
 
           <section className="card">

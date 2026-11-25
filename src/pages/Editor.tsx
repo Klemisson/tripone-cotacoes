@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, FileDown, FileText, Image as ImageIcon, Loader2, Plus, Save, Sparkles, Type, X, UserPlus } from 'lucide-react';
+import { Navigation, Check, FileDown, FileText, Image as ImageIcon, Loader2, Plus, Save, Sparkles, Type, X, UserPlus } from 'lucide-react';
 import type { Cotacao, HotelOpcao, TipoCotacao } from '../types';
 import { getDB, novaCotacaoRascunho, salvarCotacao, salvarItem, useDB, getErroGravacao } from '../lib/store';
 import { fmtDataHora, noites, normaliza, periodoAuto, uid } from '../lib/format';
 import { arquivoParaAnexo, extrairHospedagem } from '../lib/ai';
 import type { Anexo, ExtracaoHospedagem } from '../lib/ai';
 import { exportarImagem, exportarPDF } from '../lib/export';
+import { calcularDistancias, integracaoAtiva } from '../lib/integracoes';
 import { TemplateHospedagem } from '../components/Template';
 import HotelForm from '../components/HotelForm';
 import { Campo, LinhasInput } from '../components/Campos';
@@ -93,6 +94,30 @@ export default function Editor({ id }: { id?: string }) {
   const [iaCarregando, setIaCarregando] = useState(false);
   const [iaMsg, setIaMsg] = useState<{ tipo: 'ok' | 'erro'; txt: string } | null>(null);
   const [soltando, setSoltando] = useState(false);
+
+  // distâncias (Google Routes)
+  const [calcDist, setCalcDist] = useState(false);
+  const [distMsg, setDistMsg] = useState<{ tipo: 'ok' | 'erro'; txt: string } | null>(null);
+  const calcularTodas = async () => {
+    setDistMsg(null);
+    setCalcDist(true);
+    try {
+      const c = cotRef.current;
+      const destinos = c.hoteis
+        .filter((h) => (h.lat != null && h.lng != null) || h.endereco.trim())
+        .map((h) => ({ id: h.id, lat: h.lat, lng: h.lng, endereco: h.endereco }));
+      if (!destinos.length) throw new Error('Os hotéis precisam de endereço (use “Buscar no Google” ou preencha).');
+      const res = await calcularDistancias(c.enderecoReferencia, destinos);
+      const mapa = new Map(res.map((r) => [r.id, r.km]));
+      atualizar((x) => ({ ...x, hoteis: x.hoteis.map((h) => (mapa.has(h.id) ? { ...h, distanciaKm: mapa.get(h.id) ?? null } : h)) }));
+      const ok = res.filter((r) => r.km != null).length;
+      setDistMsg({ tipo: 'ok', txt: `Distância calculada para ${ok} de ${c.hoteis.length} hotel(is).` });
+    } catch (e) {
+      setDistMsg({ tipo: 'erro', txt: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setCalcDist(false);
+    }
+  };
 
   // exportação
   const tplRef = useRef<HTMLDivElement>(null);
@@ -306,8 +331,16 @@ export default function Editor({ id }: { id?: string }) {
                 <input className="inp" placeholder={periodoAuto(n) + '  (deixe vazio para automático)'} value={cot.periodoTexto} onChange={(e) => set('periodoTexto', e.target.value)} />
               </Campo>
               <Campo rotulo="Endereço de referência (para cálculo de distância)">
-                <input className="inp" placeholder="Ex.: Av. Paulista, 1000 - São Paulo/SP" value={cot.enderecoReferencia} onChange={(e) => set('enderecoReferencia', e.target.value)} />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input className="inp" placeholder="Ex.: Av. Paulista, 1000 - São Paulo/SP" value={cot.enderecoReferencia} onChange={(e) => set('enderecoReferencia', e.target.value)} />
+                  {integracaoAtiva() && (
+                    <button className="btn peq" disabled={calcDist || !cot.enderecoReferencia.trim() || !cot.hoteis.length} onClick={calcularTodas} title="Calcula a distância por estrada até cada hotel (Google)">
+                      {calcDist ? <Loader2 size={13} className="gira" /> : <Navigation size={13} />} Calcular km
+                    </button>
+                  )}
+                </div>
               </Campo>
+              {distMsg && <div className={'aviso ' + distMsg.tipo} style={{ marginTop: 0 }}>{distMsg.txt}</div>}
             </div>
           </section>
 
@@ -330,6 +363,7 @@ export default function Editor({ id }: { id?: string }) {
                 aberto={abertos.has(h.id)}
                 onToggle={() => setAbertos((s) => { const x = new Set(s); if (x.has(h.id)) x.delete(h.id); else x.add(h.id); return x; })}
                 onChange={(nh) => atualizar((c) => ({ ...c, hoteis: c.hoteis.map((y) => (y.id === nh.id ? nh : y)) }))}
+                onPatch={(hid, patch) => atualizar((c) => ({ ...c, hoteis: c.hoteis.map((y) => (y.id === hid ? { ...y, ...patch } : y)) }))}
                 onRemover={() => { if (confirm(`Excluir "${h.nome || 'hotel ' + (i + 1)}" desta cotação?`)) atualizar((c) => ({ ...c, hoteis: c.hoteis.filter((y) => y.id !== h.id) })); }}
                 onMover={moverHotel}
               />

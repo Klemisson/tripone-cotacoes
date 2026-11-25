@@ -121,7 +121,7 @@ export const TemplateHospedagem = forwardRef<HTMLDivElement, Props>(function Tem
                   )}
                   {h.endereco && <div className="tpl-end">{h.endereco}</div>}
                 </td>
-                <td className="bege">{h.distanciaKm != null ? <b className="tpl-lbl n">{fmtNum(h.distanciaKm).replace(/,00$/, '')}</b> : <Traco />}</td>
+                <td className="bege">{h.distanciaKm != null ? <b className="tpl-lbl n">{h.distanciaKm.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}</b> : <Traco />}</td>
                 <td className="tpl-cat">
                   {h.categoria && <b>{h.categoria}</b>}
                   {detalhes.length > 0 && (

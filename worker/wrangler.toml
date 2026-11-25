@@ -1,0 +1,13 @@
+name = "tripone-cotacoes-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Domínio(s) do app que podem chamar esta API, separados por vírgula. "*" libera qualquer origem.
+ALLOWED_ORIGINS = "*"
+
+# Segredos (NÃO coloque aqui; rode no terminal):
+#   npx wrangler secret put GOOGLE_MAPS_API_KEY
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put APP_TOKEN        (senha que o app envia; defina a mesma em Configurações)

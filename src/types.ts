@@ -16,6 +16,10 @@ export interface HotelOpcao {
   diaria: number | null;
   quartos: number; // multiplicador do total
   obs: string;
+  placeId?: string | null; // Google Places
+  lat?: number | null;
+  lng?: number | null;
+  avaliacaoEm?: string | null; // quando nota/avaliações vieram do Google
 }
 
 export interface Cotacao {
@@ -60,6 +64,10 @@ export interface HotelCadastro {
   contato: string;
   obs: string;
   atualizadoEm: string;
+  placeId?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  avaliacaoEm?: string | null;
 }
 
 export type TipoFornecedor = 'aerea' | 'locadora' | 'seguradora';
@@ -86,8 +94,9 @@ export interface Configuracoes {
   proximoNumero: number;
   infoPadrao: string[];
   obsPadrao: string[];
-  anthropicApiKey: string;
-  iaProxyUrl: string; // opcional: endpoint próprio que guarda a chave
+  anthropicApiKey: string; // modo simples: chave no navegador
+  apiUrl: string; // servidor TripOne (worker/): Google Places, Routes e IA
+  apiToken: string;
 }
 
 export interface BancoDados {

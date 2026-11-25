@@ -35,7 +35,10 @@ Toda a persistência passa por `src/lib/store.ts`, então migrar para um banco c
 - a chave da API Anthropic (fica salva só no navegador; prático para começar), ou
 - a URL de um endpoint próprio que guarda a chave no servidor (recomendado em produção).
 
-## Integrações (hotéis, avaliações Google, distância)
+## Integrações (Google Places + Routes) e servidor
 
-Ainda **não ligadas**: aguardando aprovação de custos. Hoje os botões “Conferir no Google Maps” e “Ver distância” abrem o Maps (gratuito).
-O ponto de extensão é `src/lib/integracoes.ts` (`ProvedorHoteis`).
+- **Buscar no Google** (por hotel): endereço, nota Google e nº de avaliações (Places API New).
+- **Distância por estrada** a partir do endereço de referência (Routes API, Route Matrix).
+- O servidor em `worker/` (Cloudflare Workers, grátis) guarda as chaves do Google e da Anthropic.
+- Passo a passo: [`docs/instalacao-integracoes.md`](docs/instalacao-integracoes.md). Custos e alternativas avaliadas: [`docs/integracoes.md`](docs/integracoes.md).
+- Sem servidor configurado, os botões abrem o Google Maps (gratuito) para preenchimento manual.

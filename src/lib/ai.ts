@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getDB } from './store';
+import { chamarApi } from './integracoes';
 
 /**
  * Preenchimento por IA (Claude). A IA só devolve o que está escrito no material;
@@ -7,8 +8,7 @@ import { getDB } from './store';
  *
  * Duas formas de uso (Configurações):
  *  - Chave da API Anthropic salva neste navegador (rápido para começar);
- *  - URL de um endpoint próprio (recomendado em produção: a chave fica no servidor).
- *    O endpoint recebe { content } e devolve o JSON no formato `ExtracaoHospedagem`.
+ *  - Servidor TripOne (pasta worker/), recomendado: a chave fica no servidor.
  */
 
 export interface ExtracaoHotel {
@@ -112,14 +112,8 @@ export async function extrairHospedagem(texto: string, anexos: Anexo[]): Promise
   });
 
   const { config } = getDB();
-  if (config.iaProxyUrl.trim()) {
-    const r = await fetch(config.iaProxyUrl.trim(), {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ system: SISTEMA, schema: SCHEMA, content }),
-    });
-    if (!r.ok) throw new Error(`Endpoint de IA respondeu ${r.status}`);
-    return (await r.json()) as ExtracaoHospedagem;
+  if (config.apiUrl.trim()) {
+    return chamarApi<ExtracaoHospedagem>('/ia/extrair', { system: SISTEMA, schema: SCHEMA, content });
   }
   if (!config.anthropicApiKey.trim()) {
     throw new Error('Configure a chave da IA em Configurações › Inteligência artificial.');

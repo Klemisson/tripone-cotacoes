@@ -140,3 +140,11 @@ textarea.inp { resize: vertical; min-height: 60px; line-height: 1.45; }
 .selo { display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: .6px; padding: 2px 7px; border-radius: 8px; background: #fff1e4; color: #b85d18; margin-left: 6px; }
 .btn.desab { opacity: .5; pointer-events: none; }
 .gira { animation: gira 1s linear infinite; } @keyframes gira { to { transform: rotate(360deg); } }
+.selo.ok { background: #e6f5ea; color: #23713a; }
+.resultados { border: 1px solid #f1c9a5; background: #fffaf5; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.resultados-t { font-size: 10.5px; font-weight: 700; color: #b85d18; padding: 2px 4px; }
+.resultados button { text-align: left; border: 1px solid transparent; background: #fff; border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 12px; }
+.resultados button:hover { border-color: var(--laranja); }
+.resultados button small { display: block; color: var(--cinza); font-size: 11px; margin-top: 2px; }
+.resultados button.cancelar { background: transparent; color: var(--cinza); text-align: center; font-size: 11px; }
+code { font-size: 11px; background: #f0f2f5; padding: 1px 4px; border-radius: 3px; }

@@ -1,4 +1,4 @@
-# Integrações: hotéis, avaliações Google e distância (proposta, aguardando aprovação)
+# Integrações: hotéis, avaliações Google e distância (aprovado: Google Places + Routes, implementado)
 
 Preços oficiais do Google Maps Platform (nov/2026), em US$, com a cota gratuita **mensal por SKU**:
 

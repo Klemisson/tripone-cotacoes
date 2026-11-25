@@ -1,8 +1,9 @@
-import { ChevronDown, ChevronUp, GripVertical, MapPin, Navigation, Trash2, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, GripVertical, Loader2, MapPin, Navigation, Search, Trash2, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import type { HotelCadastro, HotelOpcao } from '../types';
 import { fmtBRL, normaliza, totalHotel } from '../lib/format';
-import { linkMapsBusca, linkMapsRota } from '../lib/integracoes';
+import { buscarHoteis, calcularDistancias, integracaoAtiva, linkMapsBusca, linkMapsRota } from '../lib/integracoes';
+import type { ResultadoHotel } from '../lib/integracoes';
 import { Campo, NumInput } from './Campos';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
   aberto: boolean;
   onToggle: () => void;
   onChange: (h: HotelOpcao) => void;
+  onPatch: (id: string, patch: Partial<HotelOpcao>) => void; // para respostas assíncronas
   onRemover: () => void;
   onMover: (de: number, para: number) => void;
 }
@@ -26,6 +28,9 @@ export default function HotelForm(p: Props) {
   const h = p.hotel;
   const [arrastando, setArrastando] = useState(false);
   const [alvo, setAlvo] = useState(false);
+  const [buscando, setBuscando] = useState(false);
+  const [resultados, setResultados] = useState<ResultadoHotel[] | null>(null);
+  const [erroGoogle, setErroGoogle] = useState<string | null>(null);
   const set = <K extends keyof HotelOpcao>(k: K, v: HotelOpcao[K]) => p.onChange({ ...h, [k]: v });
 
   const escolherNome = (nome: string) => {
@@ -39,10 +44,53 @@ export default function HotelForm(p: Props) {
       notaGoogle: h.notaGoogle ?? cad.notaGoogle,
       numAvaliacoes: h.numAvaliacoes ?? cad.numAvaliacoes,
       endereco: h.endereco || cad.endereco,
+      placeId: h.placeId ?? cad.placeId ?? null,
+      lat: h.lat ?? cad.lat ?? null,
+      lng: h.lng ?? cad.lng ?? null,
+      avaliacaoEm: h.avaliacaoEm ?? cad.avaliacaoEm ?? null,
     });
   };
 
   const total = totalHotel(h.diaria, p.noites, h.quartos);
+  const google = integracaoAtiva();
+
+  const buscarGoogle = async () => {
+    setErroGoogle(null);
+    setResultados(null);
+    setBuscando(true);
+    try {
+      const rs = await buscarHoteis([h.nome, p.destino].filter(Boolean).join(' '));
+      if (!rs.length) setErroGoogle('Nenhum hotel encontrado no Google. Ajuste o nome ou o destino.');
+      else setResultados(rs);
+    } catch (e) {
+      setErroGoogle(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBuscando(false);
+    }
+  };
+
+  const escolherResultado = async (r: ResultadoHotel) => {
+    setResultados(null);
+    const patch: Partial<HotelOpcao> = {
+      nome: h.nome.trim() || r.nome,
+      endereco: r.endereco,
+      notaGoogle: r.notaGoogle,
+      numAvaliacoes: r.numAvaliacoes,
+      placeId: r.placeId,
+      lat: r.lat,
+      lng: r.lng,
+      avaliacaoEm: new Date().toISOString(),
+    };
+    p.onPatch(h.id, patch);
+    if (p.enderecoReferencia.trim()) {
+      try {
+        const [d] = await calcularDistancias(p.enderecoReferencia, [{ id: h.id, lat: r.lat, lng: r.lng, endereco: r.endereco }]);
+        if (d) p.onPatch(h.id, { distanciaKm: d.km });
+      } catch (e) {
+        setErroGoogle('Distância: ' + (e instanceof Error ? e.message : String(e)));
+      }
+    }
+  };
   const buscaMaps = [h.nome, h.endereco || p.destino].filter(Boolean).join(' ');
 
   return (
@@ -86,7 +134,12 @@ export default function HotelForm(p: Props) {
       {p.aberto && (
         <div className="pilha" style={{ marginTop: 10 }}>
           <div className="links">
-            <a className="btn peq lar-borda" href={linkMapsBusca(buscaMaps)} target="_blank" rel="noreferrer" title="Abre o Google Maps para conferir nota, avaliações e endereço">
+            {google && (
+              <button className="btn peq lar-borda" disabled={buscando || !(h.nome.trim() || p.destino.trim())} onClick={buscarGoogle} title="Busca endereço, nota e avaliações no Google e calcula a distância">
+                {buscando ? <Loader2 size={13} className="gira" /> : <Search size={13} />} {h.placeId ? 'Atualizar Google (avaliação)' : 'Buscar no Google'}
+              </button>
+            )}
+            <a className={'btn peq' + (google ? '' : ' lar-borda')} href={linkMapsBusca(buscaMaps)} target="_blank" rel="noreferrer" title="Abre o Google Maps para conferir nota, avaliações e endereço">
               <MapPin size={13} /> Conferir no Google Maps
             </a>
             <a
@@ -99,6 +152,21 @@ export default function HotelForm(p: Props) {
               <Navigation size={13} /> Ver distância
             </a>
           </div>
+          {resultados && (
+            <div className="resultados">
+              <div className="resultados-t">Escolha o hotel correto:</div>
+              {resultados.map((r) => (
+                <button key={r.placeId} onClick={() => escolherResultado(r)}>
+                  <b>{r.nome}</b>
+                  {r.notaGoogle != null && <span> · {r.notaGoogle.toFixed(1)} ★ ({(r.numAvaliacoes ?? 0).toLocaleString('pt-BR')})</span>}
+                  <small>{r.endereco}</small>
+                </button>
+              ))}
+              <button className="cancelar" onClick={() => setResultados(null)}>Cancelar</button>
+            </div>
+          )}
+          {erroGoogle && <div className="aviso erro" style={{ marginTop: 0 }}>{erroGoogle}</div>}
+          {h.avaliacaoEm && <div className="hotel-res" style={{ margin: 0 }}>Nota Google atualizada em {new Date(h.avaliacaoEm).toLocaleDateString('pt-BR')}</div>}
           <div className="g3">
             <Campo rotulo="Estrelas (hotel)">
               <select className="inp" value={h.estrelas ?? ''} onChange={(e) => set('estrelas', e.target.value ? Number(e.target.value) : null)}>
@@ -110,7 +178,7 @@ export default function HotelForm(p: Props) {
             <Campo rotulo="Nº avaliações"><NumInput valor={h.numAvaliacoes} decimais={0} placeholder="881" onChange={(v) => set('numAvaliacoes', v)} /></Campo>
           </div>
           <Campo rotulo="Endereço">
-            <textarea className="inp" rows={2} value={h.endereco} onChange={(e) => set('endereco', e.target.value)} />
+            <textarea className="inp" rows={2} value={h.endereco} onChange={(e) => p.onChange({ ...h, endereco: e.target.value, lat: null, lng: null })} />
           </Campo>
           <div className="g2">
             <Campo rotulo="Distância (km)"><NumInput valor={h.distanciaKm} decimais={1} placeholder="—" onChange={(v) => set('distanciaKm', v)} /></Campo>

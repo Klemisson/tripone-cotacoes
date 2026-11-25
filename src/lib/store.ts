@@ -28,7 +28,8 @@ export const configPadrao: Configuracoes = {
     'Valores sujeitos à disponibilidade e alterações sem aviso prévio no momento da confirmação da reserva.',
   ],
   anthropicApiKey: '',
-  iaProxyUrl: '',
+  apiUrl: '',
+  apiToken: '',
 };
 
 function vazio(): BancoDados {
@@ -172,6 +173,10 @@ function sincronizarHoteis(cad: HotelCadastro[], usados: HotelOpcao[]): HotelCad
       notaGoogle: h.notaGoogle ?? base.notaGoogle,
       numAvaliacoes: h.numAvaliacoes ?? base.numAvaliacoes,
       endereco: h.endereco.trim() || base.endereco,
+      placeId: h.placeId ?? base.placeId ?? null,
+      lat: h.lat ?? base.lat ?? null,
+      lng: h.lng ?? base.lng ?? null,
+      avaliacaoEm: h.avaliacaoEm ?? base.avaliacaoEm ?? null,
     };
     const mudou = i < 0 || JSON.stringify(novo) !== JSON.stringify(base);
     if (!mudou) continue;
