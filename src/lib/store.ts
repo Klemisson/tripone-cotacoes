@@ -47,6 +47,24 @@ function carregar(): BancoDados {
 }
 
 let db: BancoDados = carregar();
+// Build de demonstração (VITE_DEMO=1): carrega a cotação 1359 de exemplo quando não há dados.
+if (import.meta.env.VITE_DEMO && db.cotacoes.length === 0) db = { ...db, cotacoes: [demo()] };
+
+function demo(): Cotacao {
+  const h = (nome: string, nota: number, n: number, endereco: string, cat: string, det: string, acom: string, diaria: number | null, obs = ''): HotelOpcao => ({
+    id: uid(), nome, estrelas: 3, notaGoogle: nota, numAvaliacoes: n, endereco, distanciaKm: null, categoria: cat, detalhes: det,
+    acomodacao: acom, cafe: 'INCLUÍDO', estacionamento: 'INCLUÍDO', diaria, quartos: 1, obs,
+  });
+  return {
+    ...novaCotacaoRascunho(), id: 'exemplo-1359', numero: 1359, destino: 'CACHOEIRO DE ITAPEMIRIM, ES', checkIn: '2026-12-07', checkOut: '2026-12-08',
+    hoteis: [
+      h('EASY HOTEL CACHOEIRO DE ITAPEMIRIM BY ATLANTICA', 4.4, 1774, 'Avenida Francisco Lacerda de Aguiar, 277 - Doutor Gilberto Machado CACHOEIRO DE ITAPEMIRIM Doutor Gilberto Machado, ES BRASIL', 'single', 'standard casal', '1', 427),
+      h('Hotel Rinkão', 4.1, 1197, 'Av. Francisco Lacerda de Aguiar, 203 - Amarelo, Cachoeiro de Itapemirim - ES, 29304-393, Brazil', 'Single', 'Cama Casal', 'Acomoda 2', 308),
+      h('Hotel Diamantte em cachoeiro', 4.0, 39, 'Rodovia Engenheiro Fabiano Vivacqua, 3420 Ao lado do Hotel Rinkão - Alto Amarelo, Cachoeiro de Itapemirim - ES, 29304-393, Brazil', 'Single', 'Cama Casal', 'Acomoda 2', 287.5, 'S/ ELEVADOR'),
+      h('Hotel Rio Grande Cachoeira do Itape', 4.5, 1965, 'Av. Beira-Rio, 463 - Guandú, Cachoeiro de Itapemirim - ES, 29300-765, Brazil', 'Single', 'Solteiro', 'Acomoda 2', null, 'INDISPONIVEL'),
+    ],
+  };
+}
 const ouvintes = new Set<() => void>();
 let erroGravacao: string | null = null;
 
